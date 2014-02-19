@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# ./bin/release <BUILD_DIR>
+
+# Exit on error
+set -e
+
+# Declare a process type that will run the application.
+pkg="$(sed -n "1{p;q;}" "${1}/.go")"
+echo "---"
+echo "addons:"
+echo "default_process_types:"
+echo "  web: ./bin/${pkg}"

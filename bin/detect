@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# ./bin/detect <BUILD_DIR>
+
+# Exit on error.
+set -e
+
+# Detect a valid Go workspace.
+if [[ ! -e "${1}/.go" ]]; then
+  echo ".go doesn't exist." >& 2
+  exit 1
+fi
+pkg="$(sed -n "1{p;q;}" "${1}/.go")"
+if [[ -z "$pkg" ]]; then
+  echo ".go doesn't specify a package." >& 2
+  exit 1
+fi
+if [[ ! -d "${1}/src/${pkg}" ]]; then
+  echo "${pkg} is not a package." >& 2
+  exit 1
+fi
+pkg_files=("${1}/src/${pkg}"/*.go)
+if [[ $(head -n 1 "${pkg_files[0]}") != "package main" ]]; then
+  echo "${pkg} is not a main package." >& 2
+  exit 1
+fi
+echo "Go"
+exit 0

@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# ./bin/compile <BUILD_DIR> <CACHE_DIR>
+
+# Exit on error
+set -e
+
+# Read from the .go file.
+pkg="$(sed -n "1{p;q;}" "${1}/.go")"
+ver="$(sed -n "2{p;q;}" "${1}/.go")"
+if [[ -z "${ver}" ]]; then
+  ver="1.2"
+fi
+
+# Ensure Go is installed.
+GO_CACHE="${2}/go-${ver}"
+mkdir -p "${GO_CACHE}"
+if [[ -d "${GO_CACHE}/go" ]]; then
+  echo "-----> Using Go ${ver}."
+else
+  mkdir -p "${GO_CACHE}"
+  cd "${GO_CACHE}"
+  file="go${ver}.linux-amd64.tar.gz"
+  echo -n "-----> Downloading Go ${ver}..."
+  curl -sO "http://go.googlecode.com/files/${file}"
+  echo " done."
+  echo -n "-----> Installing Go ${ver}..."
+  tar zxf ${file}
+  echo " done."
+  rm -f ${file}
+fi
+
+# Compile the application.
+echo -n "-----> Compiling ${pkg}..."
+GOROOT="${GO_CACHE}/go" GOPATH="${1}" "${GO_CACHE}/go/bin/go" install "${pkg}"
+echo " done."
